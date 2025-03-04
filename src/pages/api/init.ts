@@ -50,7 +50,7 @@ async function fetchTitles() {
   }
 
   const data: TitleResponse = await response.json();
-  const titles = data.titles.slice(0, 1); // TODO for dev, only get 1
+  const titles = data.titles; //.slice(0, 1); // TODO for dev, only get 1
   await saveTitles(titles);
 
   for (const title of titles) {
@@ -82,7 +82,7 @@ async function fetchTitleBody(title: Title) {
       if (typeof p === 'object') {
         return Object.values(p).join(' ');
       }
-      return p;
+      return String(p); // in case any other types are present
     });
 
     // there's more cleanup we can do here
