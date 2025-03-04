@@ -1,17 +1,20 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { XMLParser } from 'fast-xml-parser';
 import { Agency, saveAgencies } from '../../db';
-import { saveTitleChapterWordCount, saveTitles, Title } from '@/db/titles';
+import { saveChapterWordCount, saveTitles, Title } from '@/db/titles';
 
 interface AgencyResponse {
   agencies: Agency[];
 }
 
+export let dbInitialized = false;
+
 export default async function initialize(req: NextApiRequest, res: NextApiResponse) {
   try {
+    res.status(200).json({ message: 'Database initializing' });
     await fetchAgencies();
     await fetchTitles();
-    res.status(200).json({ message: 'Database initialized successfully' });
+    dbInitialized = true;
   } catch (error) {
     console.error('Error initializing database:', error);
     res.status(500).json({ error: 'Failed to initialize database' });
@@ -97,7 +100,7 @@ async function fetchTitleBody(title: Title) {
       return acc;
     }, {});
 
-    await saveTitleChapterWordCount({
+    await saveChapterWordCount({
       titleNumber: title.number,
       chapterName: chapter['@_N'],
       wordCount,

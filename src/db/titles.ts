@@ -12,7 +12,7 @@ export interface Title {
 export async function saveTitles(titles: Title[]) {
   try {
     await initTables();
-    console.log(`Starting to save ${titles.length} titles...`);
+    console.log(`Saving ${titles.length} titles...`);
 
     for (const title of titles) {
       await saveTitle(title);
@@ -35,12 +35,13 @@ async function saveTitle(title: Title) {
   );
 }
 
-export async function saveTitleChapterWordCount(args: {
+export async function saveChapterWordCount(args: {
   titleNumber: number;
   chapterName: string;
   wordCount: Record<string, number>;
 }) {
   const { titleNumber, chapterName, wordCount } = args;
+  console.log(`Saving chapter word count for title ${titleNumber}, chapter ${chapterName}`);
 
   await runAsync(
     `INSERT INTO title_chapter_word_counts (title_number, chapter_name, word_count)

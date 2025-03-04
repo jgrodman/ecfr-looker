@@ -13,7 +13,7 @@ export interface Agency {
 export async function saveAgencies(agencies: Agency[]) {
   try {
     await initTables();
-    console.log(`Starting to save ${agencies.length} agencies...`);
+    console.log(`Saving ${agencies.length} agencies...`);
 
     for (const agency of agencies) {
       await saveAgency(agency);
