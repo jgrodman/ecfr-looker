@@ -10,7 +10,7 @@ interface AgencyResponse {
 function generateDates(): string[] {
   const dates: string[] = [];
   const endYear = 2025;
-  const startYear = endYear - 10;
+  const startYear = endYear - 2;
 
   for (let year = startYear; year <= endYear; year++) {
     dates.push(`${year}-01-01`);
