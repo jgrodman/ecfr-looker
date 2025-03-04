@@ -45,9 +45,14 @@ const chartOptions = {
 interface WordFrequencyChartProps {
   agencies: AgencyWithWordCount[];
   wordCountsByAgency: Map<number, WordCount[]>;
+  selectedDate: string;
 }
 
-export function WordFrequencyChart({ agencies, wordCountsByAgency }: WordFrequencyChartProps) {
+export function WordFrequencyChart({
+  agencies,
+  wordCountsByAgency,
+  selectedDate,
+}: WordFrequencyChartProps) {
   const [selectedAgencyId, setSelectedAgencyId] = useState<number | null>(
     agencies.length > 0 ? agencies[0].id : null,
   );
@@ -55,8 +60,9 @@ export function WordFrequencyChart({ agencies, wordCountsByAgency }: WordFrequen
   const selectedAgency = agencies.find((a) => a.id === selectedAgencyId);
   const wordCounts = selectedAgencyId ? wordCountsByAgency.get(selectedAgencyId) || [] : [];
 
-  // Filter out ignored words
-  const filteredWordCounts = wordCounts.filter((wc) => !ignoredWords.has(wc.word.toLowerCase()));
+  const filteredWordCounts = wordCounts
+    .filter((wc) => !ignoredWords.has(wc.word.toLowerCase()))
+    .filter((wc) => wc.date === selectedDate);
 
   const data = {
     labels: filteredWordCounts.map((wc) => wc.word),
@@ -106,7 +112,7 @@ export function WordFrequencyChart({ agencies, wordCountsByAgency }: WordFrequen
           <div className="w-full">
             <label className="block text-sm font-medium mb-2">Words to Ignore</label>
             <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 rounded-md bg-white dark:bg-gray-800">
-              {wordCounts.map((wc) => (
+              {filteredWordCounts.map((wc) => (
                 <button
                   key={wc.word}
                   onClick={() => toggleIgnoredWord(wc.word.toLowerCase())}
@@ -128,6 +134,9 @@ export function WordFrequencyChart({ agencies, wordCountsByAgency }: WordFrequen
       {selectedAgency && (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           Showing word frequencies for {selectedAgency.display_name || selectedAgency.name}
+          {selectedDate && (
+            <span className="ml-1">on {new Date(selectedDate).toLocaleDateString()}</span>
+          )}
           {ignoredWords.size > 0 && (
             <span className="ml-1">
               (ignoring {ignoredWords.size} common {ignoredWords.size === 1 ? 'word' : 'words'})
@@ -143,7 +152,7 @@ export function WordFrequencyChart({ agencies, wordCountsByAgency }: WordFrequen
       ) : (
         <div className="text-center text-gray-500 dark:text-gray-400 py-8">
           {selectedAgencyId
-            ? 'No word frequency data available'
+            ? 'No word frequency data available for the selected date'
             : 'Select an agency to view word frequencies'}
         </div>
       )}

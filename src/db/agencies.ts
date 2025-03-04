@@ -226,15 +226,14 @@ export async function getAgencyWordCounts(agencyId: number): Promise<WordCount[]
       word_totals AS (
         SELECT 
           word,
-          SUM(count) as total_count,
-          MAX(date) as date
+          SUM(count) as count,
+          date
         FROM chapter_words
-        GROUP BY word
+        GROUP BY word, date
       )
-      SELECT word, total_count as count, date
+      SELECT word, count, date
       FROM word_totals
-      ORDER BY total_count DESC
-      LIMIT 50`,
+      ORDER BY count DESC`,
       [agencyId],
       (err: Error | null, rows: WordCount[]) => {
         if (err) resolve([]);

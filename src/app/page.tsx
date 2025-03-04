@@ -9,7 +9,6 @@ export default async function Home() {
 
   try {
     [agencies, dates] = await Promise.all([getAgenciesWithWordCounts(), getAllDates()]);
-
     // Pre-fetch word counts for all agencies
     for (const agency of agencies) {
       const wordCounts = await getAgencyWordCounts(agency.id);
