@@ -1,5 +1,7 @@
 import { runAsync, dbRead } from '.';
 
+// would like to split this by read / write
+
 export interface Agency {
   id: number;
   name: string;
