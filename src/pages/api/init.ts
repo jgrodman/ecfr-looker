@@ -53,26 +53,39 @@ async function fetchTitles() {
   const titles = data.titles.slice(0, 1); // TODO for dev, only get 1
   await saveTitles(titles);
 
-  const date = '2025-02-28';
   for (const title of titles) {
-    //curl -X GET "https://www.ecfr.gov/api/versioner/v1/full/2025-02-28/title-1.xml" -H "accept: application/xml"
-    const response = await fetch(
-      `https://www.ecfr.gov/api/versioner/v1/full/${date}/title-${title.number}.xml`,
-      {
-        headers: {
-          accept: 'application/xml',
-        },
+    await fetchTitleBody(title);
+  }
+}
+
+async function fetchTitleBody(title: Title) {
+  const date = '2025-02-28';
+  const response = await fetch(
+    `https://www.ecfr.gov/api/versioner/v1/full/${date}/title-${title.number}.xml`,
+    {
+      headers: {
+        accept: 'application/xml',
       },
-    );
-    const text = await response.text();
+    },
+  );
+  const text = await response.text();
 
-    const parser = new XMLParser({
-      ignoreAttributes: false,
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+  });
+  const xml = parser.parse(text);
+
+  const chapters = nestedObjectSearch(xml, 'DIV3');
+  for (const chapter of chapters) {
+    const paragraphs = nestedObjectSearch(chapter, 'p');
+    const paragraphsWithText = paragraphs.map((p) => {
+      if (typeof p === 'object') {
+        return Object.values(p).join(' ');
+      }
+      return p;
     });
-    const xml = parser.parse(text);
 
-    const div3s = nestedObjectSearch(xml, 'DIV3'); // div3 === chapter
-    console.log(div3s);
+    console.log(paragraphsWithText);
   }
 }
 
@@ -80,8 +93,12 @@ function nestedObjectSearch(obj: any, key: string, array?: any[]) {
   array = array || [];
   if ('object' === typeof obj) {
     for (const k in obj) {
-      if (k === key) {
-        array.push(obj[k]);
+      if (k.toLowerCase() === key.toLowerCase()) {
+        if (Array.isArray(obj[k])) {
+          array.push(...obj[k]);
+        } else {
+          array.push(obj[k]);
+        }
       } else {
         nestedObjectSearch(obj[k], key, array);
       }
