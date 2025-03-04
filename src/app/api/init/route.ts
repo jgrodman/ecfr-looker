@@ -1,6 +1,6 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import { XMLParser } from 'fast-xml-parser';
-import { Agency, saveAgencies } from '../../db';
+import { Agency, saveAgencies } from '@/db';
 import { saveChapterWordCount, saveTitles, Title } from '@/db/titles';
 
 interface AgencyResponse {
@@ -9,15 +9,30 @@ interface AgencyResponse {
 
 export let dbInitialized = false;
 
-export default async function initialize(req: NextApiRequest, res: NextApiResponse) {
+export async function GET() {
   try {
-    res.status(200).json({ message: 'Database initializing' });
+    const initResponse = NextResponse.json({ message: 'Database initializing' });
+
+    initializeDb().catch((error) => {
+      console.error('Error in background initialization:', error);
+    });
+
+    return initResponse;
+  } catch (error) {
+    console.error('Error starting initialization:', error);
+    return NextResponse.json({ error: 'Failed to start initialization' }, { status: 500 });
+  }
+}
+
+async function initializeDb() {
+  try {
     await fetchAgencies();
     await fetchTitles();
     dbInitialized = true;
   } catch (error) {
     console.error('Error initializing database:', error);
-    res.status(500).json({ error: 'Failed to initialize database' });
+    dbInitialized = false;
+    throw error;
   }
 }
 
@@ -33,7 +48,6 @@ async function fetchAgencies() {
   }
 
   const data: AgencyResponse = await response.json();
-
   await saveAgencies(data.agencies);
 }
 
@@ -53,7 +67,7 @@ async function fetchTitles() {
   }
 
   const data: TitleResponse = await response.json();
-  const titles = data.titles; //.slice(0, 1); // TODO for dev, only get 1
+  const titles = data.titles;
   await saveTitles(titles);
 
   for (const title of titles) {
@@ -85,11 +99,9 @@ async function fetchTitleBody(title: Title) {
       if (typeof p === 'object') {
         return Object.values(p).join(' ');
       }
-      return String(p); // in case any other types are present
+      return String(p);
     });
 
-    // there's more cleanup we can do here
-    // for now, keep alphanumeric characters only and only words with 3+ characters
     const wordCount = paragraphsWithText.reduce((acc, p) => {
       const text = p.toLowerCase().replace(/[^a-zA-Z\s]/g, '');
       const words = text.split(/\s+/).filter(Boolean);
@@ -98,7 +110,7 @@ async function fetchTitleBody(title: Title) {
         acc[word] = (acc[word] || 0) + 1;
       });
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
 
     await saveChapterWordCount({
       titleNumber: title.number,
@@ -109,7 +121,7 @@ async function fetchTitleBody(title: Title) {
 }
 
 /* eslint-disable  @typescript-eslint/no-explicit-any */
-function nestedObjectSearch(obj: any, key: string, array?: any[]) {
+function nestedObjectSearch(obj: any, key: string, array?: any[]): any[] {
   array = array || [];
   if ('object' === typeof obj) {
     for (const k in obj) {
