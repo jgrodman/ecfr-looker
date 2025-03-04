@@ -1,5 +1,4 @@
 import sqlite3 from 'sqlite3';
-import { promisify } from 'util';
 
 export interface Agency {
   name: string;
@@ -8,34 +7,43 @@ export interface Agency {
   sortable_name: string;
   slug: string;
   children: Agency[];
+  cfr_references: { title: number; chapter: string }[];
 }
 
 const db = new sqlite3.Database('./app.db');
 
-const runAsync = promisify(db.run.bind(db));
+// Custom promisify that preserves the `this` context from callback
+function runAsync(sql: string, params: (string | number)[] = []): Promise<{ lastID: number }> {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function (this: { lastID: number }, err: Error | null) {
+      if (err) reject(err);
+      else resolve({ lastID: this.lastID });
+    });
+  });
+}
 
 export async function initializeDatabase() {
   try {
-    await runAsync(`
-      CREATE TABLE IF NOT EXISTS agencies (
+    await runAsync(
+      `CREATE TABLE IF NOT EXISTS agencies (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         short_name TEXT,
         display_name TEXT,
         sortable_name TEXT,
         slug TEXT
-      )
-    `);
+      )`,
+    );
 
-    await runAsync(`
-      CREATE TABLE IF NOT EXISTS cfr_references (
+    await runAsync(
+      `CREATE TABLE IF NOT EXISTS cfr_references (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         agency_id INTEGER,
         title INTEGER,
         chapter TEXT,
         FOREIGN KEY (agency_id) REFERENCES agencies (id)
-      )
-    `);
+      )`,
+    );
 
     console.log('Database initialized successfully');
   } catch (error) {
@@ -45,15 +53,26 @@ export async function initializeDatabase() {
 }
 
 async function saveAgency(agency: Agency) {
-  const { name, short_name, display_name, sortable_name, slug, children } = agency;
+  const { name, short_name, display_name, sortable_name, slug, children, cfr_references } = agency;
 
   try {
-    await runAsync(
+    const result = await runAsync(
       `INSERT INTO agencies (name, short_name, display_name, sortable_name, slug)
        VALUES (?, ?, ?, ?, ?)`,
-      // @ts-expect-error: sqlite3 can accept params as second argument
       [name, short_name, display_name, sortable_name, slug],
     );
+
+    const agencyId = result.lastID;
+
+    if (cfr_references && cfr_references.length > 0) {
+      for (const ref of cfr_references) {
+        await runAsync(
+          `INSERT INTO cfr_references (agency_id, title, chapter)
+           VALUES (?, ?, ?)`,
+          [agencyId, ref.title, ref.chapter],
+        );
+      }
+    }
 
     if (children && children.length > 0) {
       for (const child of children) {
