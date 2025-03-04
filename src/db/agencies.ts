@@ -112,20 +112,6 @@ async function initTables() {
   );
 }
 
-export async function getAllAgencies(): Promise<Agency[]> {
-  return new Promise((resolve) => {
-    dbRead.all(
-      `SELECT id, name, short_name, display_name, sortable_name, slug 
-       FROM agencies 
-       ORDER BY sortable_name`,
-      (err: Error | null, rows: AgencyRow[]) => {
-        if (err) resolve([]);
-        else resolve(rows as Agency[]);
-      },
-    );
-  });
-}
-
 export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]> {
   return new Promise((resolve) => {
     dbRead.all(
@@ -238,21 +224,6 @@ export async function getAgencyWordCounts(agencyId: number): Promise<WordCount[]
       (err: Error | null, rows: WordCount[]) => {
         if (err) resolve([]);
         else resolve(rows);
-      },
-    );
-  });
-}
-
-export async function getAgencyById(agencyId: number): Promise<Agency | null> {
-  return new Promise((resolve) => {
-    dbRead.get(
-      `SELECT name, short_name, display_name, sortable_name, slug 
-       FROM agencies 
-       WHERE id = ?`,
-      [agencyId],
-      (err: Error | null, row: AgencyRow | undefined) => {
-        if (err) resolve(null);
-        else resolve(row ? (row as Agency) : null);
       },
     );
   });
