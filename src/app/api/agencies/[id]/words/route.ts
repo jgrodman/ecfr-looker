@@ -1,9 +1,15 @@
 import { NextRequest } from 'next/server';
 import { getAgencyWordCounts } from '@/db/agencies';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+type Context = {
+  params: {
+    id: string;
+  };
+};
+
+export async function GET(request: NextRequest, context: Context) {
   try {
-    const agencyId = parseInt(params.id, 10);
+    const agencyId = parseInt(context.params.id, 10);
     if (isNaN(agencyId)) {
       return Response.json({ error: 'Invalid agency ID' }, { status: 400 });
     }
