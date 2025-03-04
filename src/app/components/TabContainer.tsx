@@ -8,9 +8,9 @@ import { AgencyList } from './AgencyList';
 import { Tabs } from './Tabs';
 
 const tabs = [
-  { id: 'overview', label: 'Word Count by Agency' },
-  { id: 'frequency', label: 'Most Common Words' },
   { id: 'list', label: 'Agency List' },
+  { id: 'frequency', label: 'Most Common Words' },
+  { id: 'overview', label: 'Word Count by Agency' },
 ];
 
 export function TabContainer({ agencies }: { agencies: AgencyWithWordCount[] }) {
@@ -21,9 +21,9 @@ export function TabContainer({ agencies }: { agencies: AgencyWithWordCount[] }) 
       <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="mt-6">
+        {activeTab === 'list' && <AgencyList agencies={agencies} />}
         {activeTab === 'overview' && <WordCountChart agencies={agencies} />}
         {activeTab === 'frequency' && <WordFrequencyChart agencies={agencies} />}
-        {activeTab === 'list' && <AgencyList agencies={agencies} />}
       </div>
     </div>
   );

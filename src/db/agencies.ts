@@ -13,6 +13,11 @@ export interface Agency {
 
 export interface AgencyWithWordCount extends Agency {
   total_word_count: number;
+  cfr_refs: Array<{
+    title: number;
+    chapter: string;
+    chapter_name?: string;
+  }>;
 }
 
 export interface WordCount {
@@ -122,18 +127,14 @@ export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]
   return new Promise((resolve, reject) => {
     db.all(
       `WITH agency_chapters AS (
-        SELECT a.id, a.name, a.short_name, a.display_name, a.sortable_name, a.slug, cr.title, cr.chapter
+        SELECT a.id, a.name, a.short_name, a.display_name, a.sortable_name, a.slug, 
+               cr.title, cr.chapter,
+               tcwc.word_count
         FROM agencies a
         LEFT JOIN cfr_references cr ON a.id = cr.agency_id
-      ),
-      agency_word_counts AS (
-        SELECT 
-          ac.*,
-          tcwc.word_count
-        FROM agency_chapters ac
         LEFT JOIN title_chapter_word_counts tcwc 
-        ON ac.title = tcwc.title_number 
-        AND ac.chapter = tcwc.chapter_name
+          ON cr.title = tcwc.title_number 
+          AND cr.chapter = tcwc.chapter_name
       ),
       total_counts AS (
         SELECT 
@@ -150,15 +151,41 @@ export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]
               )
             ),
             0
-          ) as total_word_count
-        FROM agency_word_counts
+          ) as total_word_count,
+          json_group_array(
+            json_object(
+              'title', title,
+              'chapter', chapter
+            )
+          ) as cfr_refs
+        FROM agency_chapters
         GROUP BY id, name, short_name, display_name, sortable_name, slug
       )
-      SELECT * FROM total_counts
+      SELECT 
+        id,
+        name,
+        short_name,
+        display_name,
+        sortable_name,
+        slug,
+        total_word_count,
+        CASE 
+          WHEN cfr_refs = '[null]' THEN '[]'
+          ELSE cfr_refs
+        END as cfr_refs
+      FROM total_counts
       ORDER BY sortable_name`,
-      (err: Error | null, rows: (AgencyRow & { total_word_count: number })[]) => {
+      (err: Error | null, rows: (AgencyRow & { total_word_count: number; cfr_refs: string })[]) => {
         if (err) reject(err);
-        else resolve(rows as AgencyWithWordCount[]);
+        else {
+          const agencies = rows.map((row) => ({
+            ...row,
+            cfr_refs: JSON.parse(row.cfr_refs),
+            children: [],
+            cfr_references: [],
+          }));
+          resolve(agencies as AgencyWithWordCount[]);
+        }
       },
     );
   });
