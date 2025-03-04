@@ -15,6 +15,8 @@ import type { AgencyWithWordCount, WordCount } from '@/db/agencies';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+const DEFAULT_IGNORED_WORDS = new Set(['the', 'and', 'for', 'this', 'with', 'that', 'which']);
+
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
@@ -43,6 +45,7 @@ const chartOptions = {
 export function WordFrequencyChart({ agencies }: { agencies: AgencyWithWordCount[] }) {
   const [selectedAgencyId, setSelectedAgencyId] = useState<number | null>(null);
   const [wordCounts, setWordCounts] = useState<WordCount[]>([]);
+  const [ignoredWords, setIgnoredWords] = useState<Set<string>>(DEFAULT_IGNORED_WORDS);
   const selectedAgency = agencies.find((a) => a.id === selectedAgencyId);
 
   useEffect(() => {
@@ -57,11 +60,14 @@ export function WordFrequencyChart({ agencies }: { agencies: AgencyWithWordCount
     fetchWordCounts();
   }, [selectedAgencyId]);
 
+  // Filter out ignored words
+  const filteredWordCounts = wordCounts.filter((wc) => !ignoredWords.has(wc.word.toLowerCase()));
+
   const data = {
-    labels: wordCounts.map((wc) => wc.word),
+    labels: filteredWordCounts.map((wc) => wc.word),
     datasets: [
       {
-        data: wordCounts.map((wc) => wc.count),
+        data: filteredWordCounts.map((wc) => wc.count),
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
         borderColor: 'rgb(75, 192, 192)',
         borderWidth: 1,
@@ -69,34 +75,74 @@ export function WordFrequencyChart({ agencies }: { agencies: AgencyWithWordCount
     ],
   };
 
+  // Toggle a word in the ignored set
+  const toggleIgnoredWord = (word: string) => {
+    const newIgnoredWords = new Set(ignoredWords);
+    if (newIgnoredWords.has(word)) {
+      newIgnoredWords.delete(word);
+    } else {
+      newIgnoredWords.add(word);
+    }
+    setIgnoredWords(newIgnoredWords);
+  };
+
   return (
     <div className="flex flex-col gap-8">
-      <div className="w-64">
-        <label className="block text-sm font-medium mb-2" htmlFor="agency-select">
-          Select Agency
-        </label>
-        <select
-          id="agency-select"
-          className="w-full p-2 border rounded-md bg-white dark:bg-gray-800 dark:border-gray-700"
-          onChange={(e) => setSelectedAgencyId(Number(e.target.value))}
-          value={selectedAgencyId || ''}
-        >
-          <option value="">Select an agency...</option>
-          {agencies.map((agency) => (
-            <option key={agency.slug} value={agency.id}>
-              {agency.display_name || agency.name}
-            </option>
-          ))}
-        </select>
+      <div className="flex gap-8">
+        <div className="w-64">
+          <label className="block text-sm font-medium mb-2" htmlFor="agency-select">
+            Select Agency
+          </label>
+          <select
+            id="agency-select"
+            className="w-full p-2 border rounded-md bg-white dark:bg-gray-800 dark:border-gray-700"
+            onChange={(e) => setSelectedAgencyId(Number(e.target.value))}
+            value={selectedAgencyId || ''}
+          >
+            <option value="">Select an agency...</option>
+            {agencies.map((agency) => (
+              <option key={agency.slug} value={agency.id}>
+                {agency.display_name || agency.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {wordCounts.length > 0 && (
+          <div className="flex-1">
+            <label className="block text-sm font-medium mb-2">Words to Ignore</label>
+            <div className="flex flex-wrap gap-2">
+              {wordCounts.map((wc) => (
+                <button
+                  key={wc.word}
+                  onClick={() => toggleIgnoredWord(wc.word.toLowerCase())}
+                  className={`px-2 py-1 text-sm rounded-full transition-colors ${
+                    ignoredWords.has(wc.word.toLowerCase())
+                      ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {wc.word}
+                  <span className="ml-1 text-xs text-gray-500">({wc.count})</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {selectedAgency && (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           Showing word frequencies for {selectedAgency.display_name || selectedAgency.name}
+          {ignoredWords.size > 0 && (
+            <span className="ml-1">
+              (ignoring {ignoredWords.size} common {ignoredWords.size === 1 ? 'word' : 'words'})
+            </span>
+          )}
         </div>
       )}
 
-      {selectedAgencyId && wordCounts.length > 0 ? (
+      {selectedAgencyId && filteredWordCounts.length > 0 ? (
         <div className="w-full h-[600px]">
           <Bar options={chartOptions} data={data} />
         </div>
