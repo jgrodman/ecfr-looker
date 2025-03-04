@@ -42,7 +42,6 @@ export async function saveChapterWordCount(args: {
   date: string;
 }) {
   const { titleNumber, chapterName, wordCount, date } = args;
-  console.log(`Saving chapter word count for title ${titleNumber}, chapter ${chapterName}`);
 
   await runAsync(
     `INSERT INTO title_chapter_word_counts (title_number, chapter_name, word_count, date)
