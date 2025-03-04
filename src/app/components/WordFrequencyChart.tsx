@@ -45,17 +45,18 @@ const chartOptions = {
 interface WordFrequencyChartProps {
   agencies: AgencyWithWordCount[];
   wordCountsByAgency: Map<number, WordCount[]>;
-  selectedDate: string;
+  availableDates: string[];
 }
 
 export function WordFrequencyChart({
   agencies,
   wordCountsByAgency,
-  selectedDate,
+  availableDates,
 }: WordFrequencyChartProps) {
   const [selectedAgencyId, setSelectedAgencyId] = useState<number | null>(
     agencies.length > 0 ? agencies[0].id : null,
   );
+  const [selectedDate, setSelectedDate] = useState<string>(availableDates[0] || '');
   const [ignoredWords, setIgnoredWords] = useState<Set<string>>(DEFAULT_IGNORED_WORDS);
   const selectedAgency = agencies.find((a) => a.id === selectedAgencyId);
   const wordCounts = selectedAgencyId ? wordCountsByAgency.get(selectedAgencyId) || [] : [];
@@ -90,22 +91,42 @@ export function WordFrequencyChart({
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-        <div className="w-64">
-          <label className="block text-sm font-medium mb-2" htmlFor="agency-select">
-            Select Agency
-          </label>
-          <select
-            id="agency-select"
-            className="w-full p-2 border rounded-md bg-white dark:bg-gray-800 dark:border-gray-700"
-            onChange={(e) => setSelectedAgencyId(Number(e.target.value))}
-            value={selectedAgencyId || ''}
-          >
-            {agencies.map((agency) => (
-              <option key={agency.slug} value={agency.id}>
-                {agency.display_name || agency.name}
-              </option>
-            ))}
-          </select>
+        <div className="flex gap-4">
+          <div className="w-64">
+            <label className="block text-sm font-medium mb-2" htmlFor="agency-select">
+              Select Agency
+            </label>
+            <select
+              id="agency-select"
+              className="w-full p-2 border rounded-md bg-white dark:bg-gray-800 dark:border-gray-700"
+              onChange={(e) => setSelectedAgencyId(Number(e.target.value))}
+              value={selectedAgencyId || ''}
+            >
+              {agencies.map((agency) => (
+                <option key={agency.slug} value={agency.id}>
+                  {agency.display_name || agency.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="w-48">
+            <label className="block text-sm font-medium mb-2" htmlFor="date-select">
+              Select Date
+            </label>
+            <select
+              id="date-select"
+              className="w-full p-2 border rounded-md bg-white dark:bg-gray-800 dark:border-gray-700"
+              onChange={(e) => setSelectedDate(e.target.value)}
+              value={selectedDate}
+            >
+              {availableDates.map((date) => (
+                <option key={date} value={date}>
+                  {new Date(date).toLocaleDateString()}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {wordCounts.length > 0 && (
