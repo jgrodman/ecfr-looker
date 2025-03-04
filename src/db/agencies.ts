@@ -45,6 +45,7 @@ async function saveAgency(agency: Agency) {
 
 export async function saveAgencies(agencies: Agency[]) {
   try {
+    await initTables();
     console.log(`Starting to save ${agencies.length} agencies...`);
 
     for (const agency of agencies) {
@@ -56,4 +57,30 @@ export async function saveAgencies(agencies: Agency[]) {
     console.error('Error saving agencies:', error);
     throw error;
   }
+}
+
+async function initTables() {
+  await runAsync(
+    `CREATE TABLE IF NOT EXISTS agencies (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          short_name TEXT,
+          display_name TEXT,
+          sortable_name TEXT,
+          slug TEXT
+        )`,
+  );
+
+  await runAsync(
+    `CREATE TABLE IF NOT EXISTS cfr_references (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          agency_id INTEGER,
+          title INTEGER,
+          chapter TEXT,
+          FOREIGN KEY (agency_id) REFERENCES agencies (id)
+        )`,
+  );
+
+  await runAsync('DELETE FROM cfr_references');
+  await runAsync('DELETE FROM agencies');
 }

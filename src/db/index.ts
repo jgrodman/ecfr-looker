@@ -1,6 +1,7 @@
-import { db } from './init';
+import sqlite3 from 'sqlite3';
 
-export * from './init';
+export const db = new sqlite3.Database('./app.db');
+
 export * from './agencies';
 
 export function runAsync(

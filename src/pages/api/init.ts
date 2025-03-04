@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Agency, initializeDatabase, saveAgencies } from '../../db';
+import { Agency, saveAgencies } from '../../db';
 
 interface AgencyResponse {
   agencies: Agency[];
@@ -7,7 +7,6 @@ interface AgencyResponse {
 
 export default async function initialize(req: NextApiRequest, res: NextApiResponse) {
   try {
-    await initializeDatabase();
     await fetchAgencies();
     await fetchTitles();
     res.status(200).json({ message: 'Database initialized successfully' });
