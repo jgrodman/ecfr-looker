@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Agency, saveAgencies } from '../../db';
+import { saveTitles, Title } from '@/db/titles';
 
 interface AgencyResponse {
   agencies: Agency[];
@@ -36,15 +37,6 @@ interface TitleResponse {
   titles: Title[];
 }
 
-interface Title {
-  number: number;
-  name: string;
-  latest_amended_on: string;
-  latest_issue_date: string;
-  up_to_date_as_of: string;
-  reserved: boolean;
-}
-
 async function fetchTitles() {
   const response = await fetch('https://www.ecfr.gov/api/versioner/v1/titles.json', {
     headers: {
@@ -58,5 +50,5 @@ async function fetchTitles() {
 
   const data: TitleResponse = await response.json();
 
-  console.log(data);
+  await saveTitles(data.titles);
 }
