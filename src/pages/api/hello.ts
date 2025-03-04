@@ -1,5 +1,5 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { Agency, saveAgencies } from '../../lib/db';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { Agency, saveAgencies } from '../../db';
 
 interface AgencyResponse {
   agencies: Agency[];
@@ -9,8 +9,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const response = await fetch('https://www.ecfr.gov/api/admin/v1/agencies.json', {
       headers: {
-        'accept': 'application/json'
-      }
+        accept: 'application/json',
+      },
     });
 
     if (!response.ok) {
@@ -18,13 +18,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const data: AgencyResponse = await response.json();
-    
-    // Save agencies to database
+
     await saveAgencies(data.agencies);
-    
-    res.status(200).json({ 
+
+    res.status(200).json({
       message: 'Agencies successfully saved to database',
-      count: data.agencies.length 
+      count: data.agencies.length,
     });
   } catch (error) {
     console.error('Error processing agencies:', error);

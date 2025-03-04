@@ -1,4 +1,4 @@
-import sqlite3 from 'sqlite3';
+import { initializeDatabase, runAsync } from '.';
 
 export interface Agency {
   name: string;
@@ -10,55 +10,13 @@ export interface Agency {
   cfr_references: { title: number; chapter: string }[];
 }
 
-const db = new sqlite3.Database('./app.db');
-
-// Custom promisify that preserves the `this` context from callback
-function runAsync(sql: string, params: (string | number)[] = []): Promise<{ lastID: number }> {
-  return new Promise((resolve, reject) => {
-    db.run(sql, params, function (this: { lastID: number }, err: Error | null) {
-      if (err) reject(err);
-      else resolve({ lastID: this.lastID });
-    });
-  });
-}
-
-export async function initializeDatabase() {
-  try {
-    await runAsync(
-      `CREATE TABLE IF NOT EXISTS agencies (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        short_name TEXT,
-        display_name TEXT,
-        sortable_name TEXT,
-        slug TEXT
-      )`,
-    );
-
-    await runAsync(
-      `CREATE TABLE IF NOT EXISTS cfr_references (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        agency_id INTEGER,
-        title INTEGER,
-        chapter TEXT,
-        FOREIGN KEY (agency_id) REFERENCES agencies (id)
-      )`,
-    );
-
-    console.log('Database initialized successfully');
-  } catch (error) {
-    console.error('Error initializing database:', error);
-    throw error;
-  }
-}
-
 async function saveAgency(agency: Agency) {
   const { name, short_name, display_name, sortable_name, slug, children, cfr_references } = agency;
 
   try {
     const result = await runAsync(
       `INSERT INTO agencies (name, short_name, display_name, sortable_name, slug)
-       VALUES (?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?)`,
       [name, short_name, display_name, sortable_name, slug],
     );
 
@@ -68,7 +26,7 @@ async function saveAgency(agency: Agency) {
       for (const ref of cfr_references) {
         await runAsync(
           `INSERT INTO cfr_references (agency_id, title, chapter)
-           VALUES (?, ?, ?)`,
+             VALUES (?, ?, ?)`,
           [agencyId, ref.title, ref.chapter],
         );
       }
