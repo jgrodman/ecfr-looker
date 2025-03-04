@@ -49,6 +49,21 @@ async function fetchTitles() {
   }
 
   const data: TitleResponse = await response.json();
+  const titles = data.titles.slice(0, 1); // TODO for dev, only get 1
+  const date = '2025-02-28';
+  for (const title of titles) {
+    //curl -X GET "https://www.ecfr.gov/api/versioner/v1/full/2025-02-28/title-1.xml" -H "accept: application/xml"
+    const response = await fetch(
+      `https://www.ecfr.gov/api/versioner/v1/full/${date}/title-${title.number}.xml`,
+      {
+        headers: {
+          accept: 'application/xml',
+        },
+      },
+    );
+    const text = await response.text();
+    console.log(text);
+  }
 
   await saveTitles(data.titles);
 }
