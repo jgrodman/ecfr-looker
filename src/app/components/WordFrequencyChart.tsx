@@ -95,6 +95,9 @@ export function WordFrequencyChart({
 
   return (
     <div className="flex flex-col gap-8">
+      <div className="text-sm text-gray-500 dark:text-gray-400 mb-2 italic">
+        Beta Mode - Only Shows First 30 Agencies
+      </div>
       <div className="flex flex-col gap-4">
         <div className="flex gap-4">
           <div className="w-64">
