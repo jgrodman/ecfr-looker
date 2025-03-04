@@ -85,7 +85,18 @@ async function fetchTitleBody(title: Title) {
       return p;
     });
 
-    console.log(paragraphsWithText);
+    // there's more cleanup we can do here
+    // for now, keep alphanumeric characters only and only words with 3+ characters
+    const wordCount = paragraphsWithText.reduce((acc, p) => {
+      const text = p.replace(/[^a-zA-Z\s]/g, '');
+      const words = text.split(/\s+/).filter(Boolean);
+      const longWords = words.filter((w) => w.length >= 3);
+      longWords.forEach((word) => {
+        acc[word] = (acc[word] || 0) + 1;
+      });
+      return acc;
+    }, {});
+    console.log(wordCount);
   }
 }
 
