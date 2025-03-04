@@ -109,6 +109,7 @@ async function fetchTitleBody(title: Title) {
       titleNumber: title.number,
       chapterName: chapter['@_N'],
       wordCount,
+      date,
     });
   }
 }

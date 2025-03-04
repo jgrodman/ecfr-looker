@@ -39,14 +39,15 @@ export async function saveChapterWordCount(args: {
   titleNumber: number;
   chapterName: string;
   wordCount: Record<string, number>;
+  date: string;
 }) {
-  const { titleNumber, chapterName, wordCount } = args;
+  const { titleNumber, chapterName, wordCount, date } = args;
   console.log(`Saving chapter word count for title ${titleNumber}, chapter ${chapterName}`);
 
   await runAsync(
-    `INSERT INTO title_chapter_word_counts (title_number, chapter_name, word_count)
-       VALUES (?, ?, ?)`,
-    [titleNumber, chapterName, JSON.stringify(wordCount)],
+    `INSERT INTO title_chapter_word_counts (title_number, chapter_name, word_count, date)
+       VALUES (?, ?, ?, ?)`,
+    [titleNumber, chapterName, JSON.stringify(wordCount), date],
   );
 }
 
@@ -70,7 +71,8 @@ async function initTables() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title_number INTEGER,
             chapter_name TEXT,
-            word_count TEXT
+            word_count TEXT,
+            date DATE
           )`,
   );
 }

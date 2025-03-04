@@ -20,6 +20,7 @@ export interface AgencyWithWordCount extends Agency {
 export interface WordCount {
   word: string;
   count: number;
+  date?: string;
 }
 
 export interface CfrReference {
@@ -214,7 +215,8 @@ export async function getAgencyWordCounts(agencyId: number): Promise<WordCount[]
       chapter_words AS (
         SELECT 
           word.key as word,
-          CAST(word.value AS INTEGER) as count
+          CAST(word.value AS INTEGER) as count,
+          tcwc.date
         FROM agency_chapters ac
         JOIN title_chapter_word_counts tcwc 
           ON ac.title = tcwc.title_number 
@@ -224,11 +226,12 @@ export async function getAgencyWordCounts(agencyId: number): Promise<WordCount[]
       word_totals AS (
         SELECT 
           word,
-          SUM(count) as total_count
+          SUM(count) as total_count,
+          MAX(date) as date
         FROM chapter_words
         GROUP BY word
       )
-      SELECT word, total_count as count
+      SELECT word, total_count as count, date
       FROM word_totals
       ORDER BY total_count DESC
       LIMIT 50`,
