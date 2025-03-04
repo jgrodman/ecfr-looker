@@ -165,7 +165,7 @@ export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]
         GROUP BY id, name, short_name, display_name, sortable_name, slug, cfr_references
       )
       SELECT * FROM total_counts
-      ORDER BY sortable_name limit 30`,
+      ORDER BY sortable_name`,
       (
         err: Error | null,
         rows: (AgencyRow & { total_word_count: number; cfr_references: string })[],

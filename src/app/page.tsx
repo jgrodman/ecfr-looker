@@ -9,7 +9,7 @@ export default async function Home() {
 
   try {
     [agencies, dates] = await Promise.all([getAgenciesWithWordCounts(), getAllDates()]);
-    for (const agency of agencies) {
+    for (const agency of agencies.slice(0, 30)) {
       const wordCounts = await getAgencyWordCounts(agency.id);
       wordCountsByAgency.set(agency.id, wordCounts);
     }
