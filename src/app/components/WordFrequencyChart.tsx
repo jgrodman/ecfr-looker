@@ -61,9 +61,13 @@ export function WordFrequencyChart({
   const selectedAgency = agencies.find((a) => a.id === selectedAgencyId);
   const wordCounts = selectedAgencyId ? wordCountsByAgency.get(selectedAgencyId) || [] : [];
 
-  const filteredWordCounts = wordCounts
-    .filter((wc) => !ignoredWords.has(wc.word.toLowerCase()))
-    .filter((wc) => wc.date === selectedDate);
+  // Get words for the selected date
+  const dateWordCounts = wordCounts.filter((wc) => wc.date === selectedDate);
+
+  // Filter ignored words only for the chart data
+  const filteredWordCounts = dateWordCounts.filter(
+    (wc) => !ignoredWords.has(wc.word.toLowerCase()),
+  );
 
   const data = {
     labels: filteredWordCounts.map((wc) => wc.word),
@@ -129,11 +133,11 @@ export function WordFrequencyChart({
           </div>
         </div>
 
-        {wordCounts.length > 0 && (
+        {dateWordCounts.length > 0 && (
           <div className="w-full">
             <label className="block text-sm font-medium mb-2">Words to Ignore</label>
             <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 rounded-md bg-white dark:bg-gray-800">
-              {filteredWordCounts.map((wc) => (
+              {dateWordCounts.map((wc) => (
                 <button
                   key={wc.word}
                   onClick={() => toggleIgnoredWord(wc.word.toLowerCase())}
