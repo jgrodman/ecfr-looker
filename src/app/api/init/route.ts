@@ -8,19 +8,15 @@ interface AgencyResponse {
 }
 
 export async function GET() {
-  try {
-    const initResponse = NextResponse.json({ message: 'Database initializing' });
+  initializeDb()
+    .catch((error) => {
+      console.error('Error initializing database:', error);
+    })
+    .then(() => {
+      console.log('Database initialized');
+    });
 
-    console.log('Initializing database');
-
-    await initializeDb();
-    console.log('Database initialized');
-
-    return initResponse;
-  } catch (error) {
-    console.error('Error starting initialization:', error);
-    return NextResponse.json({ error: 'Failed to start initialization' }, { status: 500 });
-  }
+  return NextResponse.json({ message: 'Database initializing' });
 }
 
 async function initializeDb() {
