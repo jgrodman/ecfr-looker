@@ -8,10 +8,6 @@ export interface Agency {
   sortable_name: string;
   slug: string;
   children: Agency[];
-  cfr_references: {
-    title: number;
-    chapter: string;
-  }[];
 }
 
 const db = new sqlite3.Database('./app.db');
@@ -31,6 +27,16 @@ export async function initializeDatabase() {
       )
     `);
 
+    await runAsync(`
+      CREATE TABLE IF NOT EXISTS cfr_references (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        agency_id INTEGER,
+        title INTEGER,
+        chapter TEXT,
+        FOREIGN KEY (agency_id) REFERENCES agencies (id)
+      )
+    `);
+
     console.log('Database initialized successfully');
   } catch (error) {
     console.error('Error initializing database:', error);
@@ -38,9 +44,50 @@ export async function initializeDatabase() {
   }
 }
 
+async function saveAgency(agency: Agency): Promise<number> {
+  const { name, short_name, display_name, sortable_name, slug, children } = agency;
+
+  try {
+    // Insert agency
+    const result = (await runAsync(
+      `INSERT INTO agencies (name, short_name, display_name, sortable_name, slug)
+       VALUES (?, ?, ?, ?, ?)`,
+      [name, short_name, display_name, sortable_name, slug],
+    )) as { lastID: number };
+
+    const agencyId = result.lastID;
+
+    // Recursively save children
+    if (children && children.length > 0) {
+      for (const child of children) {
+        await saveAgency(child);
+      }
+    }
+
+    return agencyId;
+  } catch (error) {
+    console.error(`Error saving agency ${name}:`, error);
+    throw error;
+  }
+}
+
 export async function saveAgencies(agencies: Agency[]) {
   try {
+    // Initialize database first
     await initializeDatabase();
+
+    // Clear existing data
+    await runAsync('DELETE FROM cfr_references');
+    await runAsync('DELETE FROM agencies');
+
+    console.log(`Starting to save ${agencies.length} agencies...`);
+
+    // Save all agencies
+    for (const agency of agencies) {
+      await saveAgency(agency);
+    }
+
+    console.log('Successfully saved all agencies to database');
   } catch (error) {
     console.error('Error saving agencies:', error);
     throw error;
