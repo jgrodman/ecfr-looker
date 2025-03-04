@@ -1,4 +1,4 @@
-import { runAsync } from '.';
+import { runAsync, db } from '.';
 
 export interface Agency {
   name: string;
@@ -9,6 +9,14 @@ export interface Agency {
   children: Agency[];
   cfr_references: { title: number; chapter: string }[];
 }
+
+type AgencyRow = {
+  name: string;
+  short_name: string;
+  display_name: string;
+  sortable_name: string;
+  slug: string;
+};
 
 export async function saveAgencies(agencies: Agency[]) {
   try {
@@ -83,4 +91,18 @@ async function initTables() {
           FOREIGN KEY (agency_id) REFERENCES agencies (id)
         )`,
   );
+}
+
+export async function getAllAgencies(): Promise<Agency[]> {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `SELECT name, short_name, display_name, sortable_name, slug 
+       FROM agencies 
+       ORDER BY sortable_name`,
+      (err: Error | null, rows: AgencyRow[]) => {
+        if (err) reject(err);
+        else resolve(rows as Agency[]);
+      },
+    );
+  });
 }
