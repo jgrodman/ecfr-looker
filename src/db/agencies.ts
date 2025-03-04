@@ -60,8 +60,11 @@ async function saveAgency(agency: Agency) {
 }
 
 async function initTables() {
+  await runAsync('DROP TABLE IF EXISTS cfr_references');
+  await runAsync('DROP TABLE IF EXISTS agencies');
+
   await runAsync(
-    `CREATE TABLE IF NOT EXISTS agencies (
+    `CREATE TABLE agencies (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT NOT NULL,
           short_name TEXT,
@@ -72,7 +75,7 @@ async function initTables() {
   );
 
   await runAsync(
-    `CREATE TABLE IF NOT EXISTS cfr_references (
+    `CREATE TABLE cfr_references (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           agency_id INTEGER,
           title INTEGER,
@@ -80,7 +83,4 @@ async function initTables() {
           FOREIGN KEY (agency_id) REFERENCES agencies (id)
         )`,
   );
-
-  await runAsync('DELETE FROM cfr_references');
-  await runAsync('DELETE FROM agencies');
 }
