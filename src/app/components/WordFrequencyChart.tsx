@@ -43,7 +43,9 @@ const chartOptions = {
 };
 
 export function WordFrequencyChart({ agencies }: { agencies: AgencyWithWordCount[] }) {
-  const [selectedAgencyId, setSelectedAgencyId] = useState<number | null>(null);
+  const [selectedAgencyId, setSelectedAgencyId] = useState<number | null>(
+    agencies.length > 0 ? agencies[0].id : null,
+  );
   const [wordCounts, setWordCounts] = useState<WordCount[]>([]);
   const [ignoredWords, setIgnoredWords] = useState<Set<string>>(DEFAULT_IGNORED_WORDS);
   const selectedAgency = agencies.find((a) => a.id === selectedAgencyId);
@@ -99,7 +101,6 @@ export function WordFrequencyChart({ agencies }: { agencies: AgencyWithWordCount
             onChange={(e) => setSelectedAgencyId(Number(e.target.value))}
             value={selectedAgencyId || ''}
           >
-            <option value="">Select an agency...</option>
             {agencies.map((agency) => (
               <option key={agency.slug} value={agency.id}>
                 {agency.display_name || agency.name}
