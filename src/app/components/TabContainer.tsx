@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { AgencyWithWordCount } from '@/db/agencies';
+import type { AgencyWithWordCount, WordCount } from '@/db/agencies';
 import { WordCountChart } from './WordCountChart';
 import { WordFrequencyChart } from './WordFrequencyChart';
 import { AgencyList } from './AgencyList';
@@ -13,7 +13,12 @@ const tabs = [
   { id: 'overview', label: 'Word Count by Agency' },
 ];
 
-export function TabContainer({ agencies }: { agencies: AgencyWithWordCount[] }) {
+interface TabContainerProps {
+  agencies: AgencyWithWordCount[];
+  wordCountsByAgency: Map<number, WordCount[]>;
+}
+
+export function TabContainer({ agencies, wordCountsByAgency }: TabContainerProps) {
   const [activeTab, setActiveTab] = useState(tabs[0].id);
 
   return (
@@ -23,7 +28,9 @@ export function TabContainer({ agencies }: { agencies: AgencyWithWordCount[] }) 
       <div className="mt-6">
         {activeTab === 'list' && <AgencyList agencies={agencies} />}
         {activeTab === 'overview' && <WordCountChart agencies={agencies} />}
-        {activeTab === 'frequency' && <WordFrequencyChart agencies={agencies} />}
+        {activeTab === 'frequency' && (
+          <WordFrequencyChart agencies={agencies} wordCountsByAgency={wordCountsByAgency} />
+        )}
       </div>
     </div>
   );

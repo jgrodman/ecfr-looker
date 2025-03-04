@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -42,25 +42,18 @@ const chartOptions = {
   },
 };
 
-export function WordFrequencyChart({ agencies }: { agencies: AgencyWithWordCount[] }) {
+interface WordFrequencyChartProps {
+  agencies: AgencyWithWordCount[];
+  wordCountsByAgency: Map<number, WordCount[]>;
+}
+
+export function WordFrequencyChart({ agencies, wordCountsByAgency }: WordFrequencyChartProps) {
   const [selectedAgencyId, setSelectedAgencyId] = useState<number | null>(
     agencies.length > 0 ? agencies[0].id : null,
   );
-  const [wordCounts, setWordCounts] = useState<WordCount[]>([]);
   const [ignoredWords, setIgnoredWords] = useState<Set<string>>(DEFAULT_IGNORED_WORDS);
   const selectedAgency = agencies.find((a) => a.id === selectedAgencyId);
-
-  useEffect(() => {
-    async function fetchWordCounts() {
-      if (selectedAgencyId === null) return;
-
-      const response = await fetch(`/api/agencies/${selectedAgencyId}/words`);
-      const data = await response.json();
-      setWordCounts(data);
-    }
-
-    fetchWordCounts();
-  }, [selectedAgencyId]);
+  const wordCounts = selectedAgencyId ? wordCountsByAgency.get(selectedAgencyId) || [] : [];
 
   // Filter out ignored words
   const filteredWordCounts = wordCounts.filter((wc) => !ignoredWords.has(wc.word.toLowerCase()));
@@ -149,7 +142,9 @@ export function WordFrequencyChart({ agencies }: { agencies: AgencyWithWordCount
         </div>
       ) : (
         <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-          {selectedAgencyId ? 'Loading...' : 'Select an agency to view word frequencies'}
+          {selectedAgencyId
+            ? 'No word frequency data available'
+            : 'Select an agency to view word frequencies'}
         </div>
       )}
     </div>
