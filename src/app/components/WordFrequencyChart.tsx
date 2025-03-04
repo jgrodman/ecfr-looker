@@ -135,27 +135,22 @@ export function WordFrequencyChart({
 
         {dateWordCounts.length > 0 && (
           <div className="w-full">
-            <label className="block text-sm font-medium mb-2">
-              Words to Ignore (Top 20 Most Common)
-            </label>
+            <label className="block text-sm font-medium mb-2">Words to Ignore</label>
             <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 rounded-md bg-white dark:bg-gray-800">
-              {dateWordCounts
-                .sort((a, b) => b.count - a.count)
-                .slice(0, 20)
-                .map((wc) => (
-                  <button
-                    key={wc.word}
-                    onClick={() => toggleIgnoredWord(wc.word.toLowerCase())}
-                    className={`px-2 py-1 text-sm rounded-full transition-colors ${
-                      ignoredWords.has(wc.word.toLowerCase())
-                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                        : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    {wc.word}
-                    <span className="ml-1 text-xs text-gray-500">({wc.count})</span>
-                  </button>
-                ))}
+              {dateWordCounts.map((wc) => (
+                <button
+                  key={wc.word}
+                  onClick={() => toggleIgnoredWord(wc.word.toLowerCase())}
+                  className={`px-2 py-1 text-sm rounded-full transition-colors ${
+                    ignoredWords.has(wc.word.toLowerCase())
+                      ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {wc.word}
+                  <span className="ml-1 text-xs text-gray-500">({wc.count})</span>
+                </button>
+              ))}
             </div>
           </div>
         )}
