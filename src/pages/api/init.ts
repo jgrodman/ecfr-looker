@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { XMLParser } from 'fast-xml-parser';
 import { Agency, saveAgencies } from '../../db';
 import { saveTitles, Title } from '@/db/titles';
 
@@ -50,6 +51,8 @@ async function fetchTitles() {
 
   const data: TitleResponse = await response.json();
   const titles = data.titles.slice(0, 1); // TODO for dev, only get 1
+  await saveTitles(titles);
+
   const date = '2025-02-28';
   for (const title of titles) {
     //curl -X GET "https://www.ecfr.gov/api/versioner/v1/full/2025-02-28/title-1.xml" -H "accept: application/xml"
@@ -62,8 +65,8 @@ async function fetchTitles() {
       },
     );
     const text = await response.text();
-    console.log(text);
-  }
 
-  await saveTitles(data.titles);
+    const parser = new XMLParser();
+    const xml = parser.parse(text);
+  }
 }
