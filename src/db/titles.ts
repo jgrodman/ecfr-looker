@@ -35,6 +35,20 @@ async function saveTitle(title: Title) {
   );
 }
 
+export async function saveTitleChapterWordCount(args: {
+  titleNumber: number;
+  chapterName: string;
+  wordCount: Record<string, number>;
+}) {
+  const { titleNumber, chapterName, wordCount } = args;
+
+  await runAsync(
+    `INSERT INTO title_chapter_word_counts (title_number, chapter_name, word_count)
+       VALUES (?, ?, ?)`,
+    [titleNumber, chapterName, JSON.stringify(wordCount)],
+  );
+}
+
 async function initTables() {
   await runAsync('DROP TABLE IF EXISTS titles');
   await runAsync(
@@ -46,6 +60,16 @@ async function initTables() {
             latest_issue_date DATE,
             up_to_date_as_of DATE,
             reserved BOOLEAN
+          )`,
+  );
+
+  await runAsync('DROP TABLE IF EXISTS title_chapter_word_counts');
+  await runAsync(
+    `CREATE TABLE title_chapter_word_counts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title_number INTEGER,
+            chapter_name TEXT,
+            word_count TEXT
           )`,
   );
 }

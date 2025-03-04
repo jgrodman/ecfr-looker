@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { XMLParser } from 'fast-xml-parser';
 import { Agency, saveAgencies } from '../../db';
-import { saveTitles, Title } from '@/db/titles';
+import { saveTitleChapterWordCount, saveTitles, Title } from '@/db/titles';
 
 interface AgencyResponse {
   agencies: Agency[];
@@ -88,7 +88,7 @@ async function fetchTitleBody(title: Title) {
     // there's more cleanup we can do here
     // for now, keep alphanumeric characters only and only words with 3+ characters
     const wordCount = paragraphsWithText.reduce((acc, p) => {
-      const text = p.replace(/[^a-zA-Z\s]/g, '');
+      const text = p.toLowerCase().replace(/[^a-zA-Z\s]/g, '');
       const words = text.split(/\s+/).filter(Boolean);
       const longWords = words.filter((w) => w.length >= 3);
       longWords.forEach((word) => {
@@ -96,7 +96,12 @@ async function fetchTitleBody(title: Title) {
       });
       return acc;
     }, {});
-    console.log(wordCount);
+
+    await saveTitleChapterWordCount({
+      titleNumber: title.number,
+      chapterName: chapter['@_N'],
+      wordCount,
+    });
   }
 }
 
