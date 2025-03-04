@@ -1,4 +1,4 @@
-import { runAsync, db } from '.';
+import { runAsync, dbRead } from '.';
 
 export interface Agency {
   id: number;
@@ -111,7 +111,7 @@ async function initTables() {
 
 export async function getAllAgencies(): Promise<Agency[]> {
   return new Promise((resolve) => {
-    db.all(
+    dbRead.all(
       `SELECT id, name, short_name, display_name, sortable_name, slug 
        FROM agencies 
        ORDER BY sortable_name`,
@@ -125,7 +125,7 @@ export async function getAllAgencies(): Promise<Agency[]> {
 
 export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]> {
   return new Promise((resolve) => {
-    db.all(
+    dbRead.all(
       `WITH agency_chapters AS (
         SELECT 
           a.id, 
@@ -202,7 +202,7 @@ export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]
 
 export async function getAgencyWordCounts(agencyId: number): Promise<WordCount[]> {
   return new Promise((resolve) => {
-    db.all(
+    dbRead.get(
       `WITH agency_chapters AS (
         SELECT cr.title, cr.chapter
         FROM agencies a
@@ -241,7 +241,7 @@ export async function getAgencyWordCounts(agencyId: number): Promise<WordCount[]
 
 export async function getAgencyById(agencyId: number): Promise<Agency | null> {
   return new Promise((resolve) => {
-    db.get(
+    dbRead.get(
       `SELECT name, short_name, display_name, sortable_name, slug 
        FROM agencies 
        WHERE id = ?`,
