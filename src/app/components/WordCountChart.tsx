@@ -40,11 +40,13 @@ const chartOptions = {
 };
 
 export function WordCountChart({ agencies }: { agencies: AgencyWithWordCount[] }) {
+  const sortedAgencies = [...agencies].sort((a, b) => b.total_word_count - a.total_word_count);
+
   const data = {
-    labels: agencies.map((agency) => agency.display_name || agency.name),
+    labels: sortedAgencies.map((agency) => agency.display_name || agency.name),
     datasets: [
       {
-        data: agencies.map((agency) => agency.total_word_count),
+        data: sortedAgencies.map((agency) => agency.total_word_count),
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
         borderColor: 'rgb(53, 162, 235)',
         borderWidth: 1,
