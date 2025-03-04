@@ -1,6 +1,7 @@
 import { runAsync, db } from '.';
 
 export interface Agency {
+  id: number;
   name: string;
   short_name: string;
   display_name: string;
@@ -14,7 +15,13 @@ export interface AgencyWithWordCount extends Agency {
   total_word_count: number;
 }
 
+export interface WordCount {
+  word: string;
+  count: number;
+}
+
 type AgencyRow = {
+  id: number;
   name: string;
   short_name: string;
   display_name: string;
@@ -100,7 +107,7 @@ async function initTables() {
 export async function getAllAgencies(): Promise<Agency[]> {
   return new Promise((resolve, reject) => {
     db.all(
-      `SELECT name, short_name, display_name, sortable_name, slug 
+      `SELECT id, name, short_name, display_name, sortable_name, slug 
        FROM agencies 
        ORDER BY sortable_name`,
       (err: Error | null, rows: AgencyRow[]) => {
@@ -115,7 +122,7 @@ export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]
   return new Promise((resolve, reject) => {
     db.all(
       `WITH agency_chapters AS (
-        SELECT a.*, cr.title, cr.chapter
+        SELECT a.id, a.name, a.short_name, a.display_name, a.sortable_name, a.slug, cr.title, cr.chapter
         FROM agencies a
         LEFT JOIN cfr_references cr ON a.id = cr.agency_id
       ),
@@ -130,6 +137,7 @@ export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]
       ),
       total_counts AS (
         SELECT 
+          id,
           name,
           short_name,
           display_name,
@@ -144,13 +152,67 @@ export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]
             0
           ) as total_word_count
         FROM agency_word_counts
-        GROUP BY name, short_name, display_name, sortable_name, slug
+        GROUP BY id, name, short_name, display_name, sortable_name, slug
       )
       SELECT * FROM total_counts
       ORDER BY sortable_name`,
       (err: Error | null, rows: (AgencyRow & { total_word_count: number })[]) => {
         if (err) reject(err);
         else resolve(rows as AgencyWithWordCount[]);
+      },
+    );
+  });
+}
+
+export async function getAgencyWordCounts(agencyId: number): Promise<WordCount[]> {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `WITH agency_chapters AS (
+        SELECT cr.title, cr.chapter
+        FROM agencies a
+        JOIN cfr_references cr ON a.id = cr.agency_id
+        WHERE a.id = ?
+      ),
+      chapter_words AS (
+        SELECT 
+          word.key as word,
+          CAST(word.value AS INTEGER) as count
+        FROM agency_chapters ac
+        JOIN title_chapter_word_counts tcwc 
+          ON ac.title = tcwc.title_number 
+          AND ac.chapter = tcwc.chapter_name
+        JOIN json_each(tcwc.word_count) word
+      ),
+      word_totals AS (
+        SELECT 
+          word,
+          SUM(count) as total_count
+        FROM chapter_words
+        GROUP BY word
+      )
+      SELECT word, total_count as count
+      FROM word_totals
+      ORDER BY total_count DESC
+      LIMIT 50`,
+      [agencyId],
+      (err: Error | null, rows: WordCount[]) => {
+        if (err) reject(err);
+        else resolve(rows);
+      },
+    );
+  });
+}
+
+export async function getAgencyById(agencyId: number): Promise<Agency | null> {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT name, short_name, display_name, sortable_name, slug 
+       FROM agencies 
+       WHERE id = ?`,
+      [agencyId],
+      (err: Error | null, row: AgencyRow | undefined) => {
+        if (err) reject(err);
+        else resolve(row ? (row as Agency) : null);
       },
     );
   });
