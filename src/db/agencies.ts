@@ -110,7 +110,7 @@ async function initTables() {
 }
 
 export async function getAllAgencies(): Promise<Agency[]> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     db.all(
       `SELECT id, name, short_name, display_name, sortable_name, slug 
        FROM agencies 
@@ -124,7 +124,7 @@ export async function getAllAgencies(): Promise<Agency[]> {
 }
 
 export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     db.all(
       `WITH agency_chapters AS (
         SELECT 
@@ -201,7 +201,7 @@ export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]
 }
 
 export async function getAgencyWordCounts(agencyId: number): Promise<WordCount[]> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     db.all(
       `WITH agency_chapters AS (
         SELECT cr.title, cr.chapter
@@ -240,7 +240,7 @@ export async function getAgencyWordCounts(agencyId: number): Promise<WordCount[]
 }
 
 export async function getAgencyById(agencyId: number): Promise<Agency | null> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     db.get(
       `SELECT name, short_name, display_name, sortable_name, slug 
        FROM agencies 
