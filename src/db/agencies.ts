@@ -10,6 +10,22 @@ export interface Agency {
   cfr_references: { title: number; chapter: string }[];
 }
 
+export async function saveAgencies(agencies: Agency[]) {
+  try {
+    await initTables();
+    console.log(`Starting to save ${agencies.length} agencies...`);
+
+    for (const agency of agencies) {
+      await saveAgency(agency);
+    }
+
+    console.log('Successfully saved all agencies to database');
+  } catch (error) {
+    console.error('Error saving agencies:', error);
+    throw error;
+  }
+}
+
 async function saveAgency(agency: Agency) {
   const { name, short_name, display_name, sortable_name, slug, children, cfr_references } = agency;
 
@@ -39,22 +55,6 @@ async function saveAgency(agency: Agency) {
     }
   } catch (error) {
     console.error(`Error saving agency ${name}:`, error);
-    throw error;
-  }
-}
-
-export async function saveAgencies(agencies: Agency[]) {
-  try {
-    await initTables();
-    console.log(`Starting to save ${agencies.length} agencies...`);
-
-    for (const agency of agencies) {
-      await saveAgency(agency);
-    }
-
-    console.log('Successfully saved all agencies to database');
-  } catch (error) {
-    console.error('Error saving agencies:', error);
     throw error;
   }
 }
