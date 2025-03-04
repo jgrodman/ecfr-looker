@@ -19,6 +19,7 @@ function generateDates(): string[] {
 }
 
 export async function GET() {
+  return NextResponse.json({ message: 'Remove me to enable initialization' });
   initializeDb()
     .catch((error) => {
       console.error('Error initializing database:', error);
