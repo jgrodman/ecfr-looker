@@ -31,7 +31,7 @@ async function saveTitle(title: Title) {
   await runAsync(
     `INSERT INTO titles (number, name, latest_amended_on, latest_issue_date, up_to_date_as_of, reserved)
        VALUES (?, ?, ?, ?, ?, ?)`,
-    [number, name, latest_amended_on, latest_issue_date, up_to_date_as_of, reserved],
+    [number, name, latest_amended_on, latest_issue_date, up_to_date_as_of, reserved ? 1 : 0],
   );
 }
 
