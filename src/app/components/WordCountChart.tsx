@@ -23,7 +23,7 @@ const chartOptions = {
     },
     title: {
       display: true,
-      text: 'Word Count by Agency',
+      text: 'Word Count by Agency across all titles',
       font: {
         size: 16,
       },

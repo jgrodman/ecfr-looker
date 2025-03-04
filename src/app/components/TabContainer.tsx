@@ -9,7 +9,7 @@ import { Tabs } from './Tabs';
 
 const tabs = [
   { id: 'list', label: 'Agency List' },
-  { id: 'frequency', label: 'Most Common Words' },
+  { id: 'frequency', label: 'Most Common Words by Agency' },
   { id: 'overview', label: 'Word Count by Agency' },
 ];
 
