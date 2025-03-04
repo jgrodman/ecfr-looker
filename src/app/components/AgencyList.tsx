@@ -16,19 +16,14 @@ export function AgencyList({ agencies }: { agencies: AgencyWithWordCount[] }) {
 
           return (
             <li key={agency.slug} className="py-6">
-              <div className="flex flex-col gap-2">
-                <h3 className="text-lg font-semibold">{agency.display_name || agency.name}</h3>
-                <div className="flex gap-4">
-                  {agency.short_name && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{agency.short_name}</p>
-                  )}
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {agency.total_word_count.toLocaleString()} words
-                  </p>
-                </div>
+              <div className="flex flex-col gap-3">
+                <h3 className="text-2xl font-semibold">{agency.display_name || agency.name}</h3>
+                {agency.short_name && (
+                  <p className="text-lg text-gray-600 dark:text-gray-300">{agency.short_name}</p>
+                )}
 
                 {uniqueRefs.size > 0 && (
-                  <div className="mt-2">
+                  <div>
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       CFR References:
                     </h4>
