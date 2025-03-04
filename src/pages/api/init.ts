@@ -90,8 +90,8 @@ async function fetchTitleBody(title: Title) {
     const wordCount = paragraphsWithText.reduce((acc, p) => {
       const text = p.toLowerCase().replace(/[^a-zA-Z\s]/g, '');
       const words = text.split(/\s+/).filter(Boolean);
-      const longWords = words.filter((w) => w.length >= 3);
-      longWords.forEach((word) => {
+      const longWords = words.filter((w: string) => w.length >= 3);
+      longWords.forEach((word: string) => {
         acc[word] = (acc[word] || 0) + 1;
       });
       return acc;
@@ -105,6 +105,7 @@ async function fetchTitleBody(title: Title) {
   }
 }
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 function nestedObjectSearch(obj: any, key: string, array?: any[]) {
   array = array || [];
   if ('object' === typeof obj) {
