@@ -103,7 +103,7 @@ async function fetchTitleBody(title: Title) {
     });
 
     const wordCount = paragraphsWithText.reduce((acc, p) => {
-      const text = p.toLowerCase().replace(/[^a-zA-Z\s]/g, '');
+      const text = p.toLowerCase().replace(/[^a-zA-Z'\s]/g, '');
       const words = text.split(/\s+/).filter(Boolean);
       const longWords = words.filter((w: string) => w.length >= 3);
       longWords.forEach((word: string) => {

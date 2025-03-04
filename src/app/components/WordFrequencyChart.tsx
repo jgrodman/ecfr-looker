@@ -88,7 +88,7 @@ export function WordFrequencyChart({ agencies }: { agencies: AgencyWithWordCount
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex gap-8">
+      <div className="flex flex-col gap-4">
         <div className="w-64">
           <label className="block text-sm font-medium mb-2" htmlFor="agency-select">
             Select Agency
@@ -109,9 +109,9 @@ export function WordFrequencyChart({ agencies }: { agencies: AgencyWithWordCount
         </div>
 
         {wordCounts.length > 0 && (
-          <div className="flex-1">
+          <div className="w-full">
             <label className="block text-sm font-medium mb-2">Words to Ignore</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 rounded-md bg-white dark:bg-gray-800">
               {wordCounts.map((wc) => (
                 <button
                   key={wc.word}
