@@ -258,3 +258,17 @@ export async function getAgencyById(agencyId: number): Promise<Agency | null> {
     );
   });
 }
+
+export async function getAllDates(): Promise<string[]> {
+  return new Promise((resolve) => {
+    dbRead.all(
+      `SELECT DISTINCT date 
+       FROM title_chapter_word_counts 
+       ORDER BY date DESC`,
+      (err: Error | null, rows: { date: string }[]) => {
+        if (err) resolve([]);
+        else resolve(rows.map((row) => row.date));
+      },
+    );
+  });
+}

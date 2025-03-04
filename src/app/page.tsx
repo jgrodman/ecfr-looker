@@ -1,13 +1,14 @@
-import { getAgenciesWithWordCounts, getAgencyWordCounts } from '@/db/agencies';
+import { getAgenciesWithWordCounts, getAgencyWordCounts, getAllDates } from '@/db/agencies';
 import { TabContainer } from './components/TabContainer';
 import type { AgencyWithWordCount, WordCount } from '@/db/agencies';
 
 export default async function Home() {
   let agencies: AgencyWithWordCount[] = [];
   const wordCountsByAgency = new Map<number, WordCount[]>();
+  let dates: string[] = [];
 
   try {
-    agencies = await getAgenciesWithWordCounts();
+    [agencies, dates] = await Promise.all([getAgenciesWithWordCounts(), getAllDates()]);
 
     // Pre-fetch word counts for all agencies
     for (const agency of agencies) {
@@ -27,7 +28,11 @@ export default async function Home() {
           </div>
         )}
         <h1 className="text-3xl font-bold mb-8">Federal Agencies Word Count Analysis</h1>
-        <TabContainer agencies={agencies} wordCountsByAgency={wordCountsByAgency} />
+        <TabContainer
+          agencies={agencies}
+          wordCountsByAgency={wordCountsByAgency}
+          availableDates={dates}
+        />
       </main>
     </div>
   );
