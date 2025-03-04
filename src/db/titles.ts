@@ -36,16 +36,16 @@ async function saveTitle(title: Title) {
 }
 
 async function initTables() {
+  await runAsync('DROP TABLE IF EXISTS titles');
   await runAsync(
-    `CREATE TABLE IF NOT EXISTS titles (
+    `CREATE TABLE titles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             number INTEGER,
             name TEXT,
-            latest_amended_on TEXT,
-            latest_issue_date TEXT,
-            up_to_date_as_of TEXT,
+            latest_amended_on DATE,
+            latest_issue_date DATE,
+            up_to_date_as_of DATE,
             reserved BOOLEAN
           )`,
   );
-  await runAsync('DELETE FROM titles');
 }
