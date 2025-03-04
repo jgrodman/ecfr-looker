@@ -202,7 +202,7 @@ export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]
 
 export async function getAgencyWordCounts(agencyId: number): Promise<WordCount[]> {
   return new Promise((resolve) => {
-    dbRead.get(
+    dbRead.all(
       `WITH agency_chapters AS (
         SELECT cr.title, cr.chapter
         FROM agencies a
