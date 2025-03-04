@@ -66,7 +66,26 @@ async function fetchTitles() {
     );
     const text = await response.text();
 
-    const parser = new XMLParser();
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+    });
     const xml = parser.parse(text);
+
+    const div3s = nestedObjectSearch(xml, 'DIV3'); // div3 === chapter
+    console.log(div3s);
   }
+}
+
+function nestedObjectSearch(obj: any, key: string, array?: any[]) {
+  array = array || [];
+  if ('object' === typeof obj) {
+    for (const k in obj) {
+      if (k === key) {
+        array.push(obj[k]);
+      } else {
+        nestedObjectSearch(obj[k], key, array);
+      }
+    }
+  }
+  return array;
 }
