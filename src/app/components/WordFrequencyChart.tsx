@@ -60,6 +60,7 @@ export function WordFrequencyChart({
   const [ignoredWords, setIgnoredWords] = useState<Set<string>>(DEFAULT_IGNORED_WORDS);
   const selectedAgency = agencies.find((a) => a.id === selectedAgencyId);
   const wordCounts = selectedAgencyId ? wordCountsByAgency.get(selectedAgencyId) || [] : [];
+  const sortedAgencies = agencies.sort((a, b) => a.name.localeCompare(b.name));
 
   // Get words for the selected date
   const dateWordCounts = wordCounts.filter((wc) => wc.date === selectedDate);
@@ -106,7 +107,7 @@ export function WordFrequencyChart({
               onChange={(e) => setSelectedAgencyId(Number(e.target.value))}
               value={selectedAgencyId || ''}
             >
-              {agencies.map((agency) => (
+              {sortedAgencies.map((agency) => (
                 <option key={agency.slug} value={agency.id}>
                   {agency.display_name || agency.name}
                 </option>
