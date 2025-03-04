@@ -26,6 +26,9 @@ export async function initializeDatabase() {
       )`,
     );
 
+    await runAsync('DELETE FROM cfr_references');
+    await runAsync('DELETE FROM agencies');
+
     console.log('Database initialized successfully');
   } catch (error) {
     console.error('Error initializing database:', error);

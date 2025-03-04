@@ -1,4 +1,4 @@
-import { initializeDatabase, runAsync } from '.';
+import { runAsync } from '.';
 
 export interface Agency {
   name: string;
@@ -45,16 +45,8 @@ async function saveAgency(agency: Agency) {
 
 export async function saveAgencies(agencies: Agency[]) {
   try {
-    // Initialize database first
-    await initializeDatabase();
-
-    // Clear existing data
-    await runAsync('DELETE FROM cfr_references');
-    await runAsync('DELETE FROM agencies');
-
     console.log(`Starting to save ${agencies.length} agencies...`);
 
-    // Save all agencies
     for (const agency of agencies) {
       await saveAgency(agency);
     }
