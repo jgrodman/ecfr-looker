@@ -14,7 +14,7 @@ export interface Agency {
   }[];
 }
 
-const db = new sqlite3.Database('./ecfr.db');
+const db = new sqlite3.Database('./app.db');
 
 const runAsync = promisify(db.run.bind(db));
 
