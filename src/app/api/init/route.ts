@@ -7,16 +7,10 @@ interface AgencyResponse {
   agencies: Agency[];
 }
 
-export let dbInitialized = false;
-
 export async function GET() {
   try {
     const initResponse = NextResponse.json({ message: 'Database initializing' });
 
-    if (dbInitialized) {
-      return initResponse;
-    }
-    dbInitialized = true;
     console.log('Initializing database');
 
     await initializeDb();
@@ -35,7 +29,6 @@ async function initializeDb() {
     await fetchTitles();
   } catch (error) {
     console.error('Error initializing database:', error);
-    dbInitialized = false;
     throw error;
   }
 }
