@@ -8,7 +8,6 @@ interface CfrRef {
   chapter: string;
 }
 
-// Extend AgencyWithWordCount to include cfr_references
 interface AgencyWithRefs extends AgencyWithWordCount {
   cfr_references: CfrRef[];
   id: number;
@@ -49,7 +48,6 @@ export function AgencyList({ agencies }: { agencies: AgencyWithRefs[] }) {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <ul className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredAgencies.map((agency) => {
-              // Remove duplicate references
               const uniqueRefs = (agency.cfr_references || []).reduce(
                 (acc: Map<string, CfrRef>, ref: CfrRef) => {
                   const key = `${ref.title}-${ref.chapter}`;
