@@ -116,7 +116,7 @@ export async function getAllAgencies(): Promise<Agency[]> {
        FROM agencies 
        ORDER BY sortable_name`,
       (err: Error | null, rows: AgencyRow[]) => {
-        if (err) reject(err);
+        if (err) resolve([]);
         else resolve(rows as Agency[]);
       },
     );
@@ -181,7 +181,7 @@ export async function getAgenciesWithWordCounts(): Promise<AgencyWithWordCount[]
         err: Error | null,
         rows: (AgencyRow & { total_word_count: number; cfr_references: string })[],
       ) => {
-        if (err) reject(err);
+        if (err) resolve([]);
         else {
           // Parse the JSON string of CFR references for each agency
           const agenciesWithParsedRefs = rows.map((row) => ({
@@ -232,7 +232,7 @@ export async function getAgencyWordCounts(agencyId: number): Promise<WordCount[]
       LIMIT 50`,
       [agencyId],
       (err: Error | null, rows: WordCount[]) => {
-        if (err) reject(err);
+        if (err) resolve([]);
         else resolve(rows);
       },
     );
@@ -247,7 +247,7 @@ export async function getAgencyById(agencyId: number): Promise<Agency | null> {
        WHERE id = ?`,
       [agencyId],
       (err: Error | null, row: AgencyRow | undefined) => {
-        if (err) reject(err);
+        if (err) resolve(null);
         else resolve(row ? (row as Agency) : null);
       },
     );
