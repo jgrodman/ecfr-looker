@@ -44,27 +44,21 @@ export async function initializeDatabase() {
   }
 }
 
-async function saveAgency(agency: Agency): Promise<number> {
+async function saveAgency(agency: Agency) {
   const { name, short_name, display_name, sortable_name, slug, children } = agency;
 
   try {
-    // Insert agency
-    const result = (await runAsync(
+    await runAsync(
       `INSERT INTO agencies (name, short_name, display_name, sortable_name, slug)
        VALUES (?, ?, ?, ?, ?)`,
       [name, short_name, display_name, sortable_name, slug],
-    )) as { lastID: number };
+    );
 
-    const agencyId = result.lastID;
-
-    // Recursively save children
     if (children && children.length > 0) {
       for (const child of children) {
         await saveAgency(child);
       }
     }
-
-    return agencyId;
   } catch (error) {
     console.error(`Error saving agency ${name}:`, error);
     throw error;
