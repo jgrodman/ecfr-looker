@@ -13,9 +13,14 @@ export async function GET() {
   try {
     const initResponse = NextResponse.json({ message: 'Database initializing' });
 
-    initializeDb().catch((error) => {
-      console.error('Error in background initialization:', error);
-    });
+    if (dbInitialized) {
+      return initResponse;
+    }
+    dbInitialized = true;
+    console.log('Initializing database');
+
+    await initializeDb();
+    console.log('Database initialized');
 
     return initResponse;
   } catch (error) {
@@ -28,7 +33,6 @@ async function initializeDb() {
   try {
     await fetchAgencies();
     await fetchTitles();
-    dbInitialized = true;
   } catch (error) {
     console.error('Error initializing database:', error);
     dbInitialized = false;
