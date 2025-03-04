@@ -1,17 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-
-interface Agency {
-  name: string;
-  short_name: string;
-  display_name: string;
-  sortable_name: string;
-  slug: string;
-  children: Agency[];
-  cfr_references: {
-    title: number;
-    chapter: string;
-  }[];
-}
+import { Agency, saveAgencies } from '../../lib/db';
 
 interface AgencyResponse {
   agencies: Agency[];
@@ -30,9 +18,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const data: AgencyResponse = await response.json();
-    res.status(200).json(data);
+    
+    // Save agencies to database
+    await saveAgencies(data.agencies);
+    
+    res.status(200).json({ 
+      message: 'Agencies successfully saved to database',
+      count: data.agencies.length 
+    });
   } catch (error) {
-    console.error('Error fetching agencies:', error);
-    res.status(500).json({ error: 'Failed to fetch agencies data' });
+    console.error('Error processing agencies:', error);
+    res.status(500).json({ error: 'Failed to process agencies data' });
   }
 }
