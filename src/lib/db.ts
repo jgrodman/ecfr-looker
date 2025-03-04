@@ -51,6 +51,7 @@ async function saveAgency(agency: Agency) {
     await runAsync(
       `INSERT INTO agencies (name, short_name, display_name, sortable_name, slug)
        VALUES (?, ?, ?, ?, ?)`,
+      // @ts-expect-error: sqlite3 can accept params as second argument
       [name, short_name, display_name, sortable_name, slug],
     );
 
